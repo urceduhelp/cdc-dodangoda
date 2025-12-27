@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDC දොඩන්ගොඩ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                padding: 40px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+        }
+        
+        .search-container {
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #667eea;
+            border-radius: 50px;
+            outline: none;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+        }
+        
+        .search-box:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        @media (min-width: 768px) {
+            .category-tabs {
+                gap: 10px;
+            }
+            
+            .tab {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+        }
+        
+        .tab.govs {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .tab.govg {
+            background: #dd6b20;
+            color: white;
+        }
+        
+        .tab.pvts {
+            background: #805ad5;
+            color: white;
+        }
+        
+        .tab.pvtg {
+            background: #553c9a;
+            color: white;
+        }
+        
+        .tab.active {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .subcategory-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .subcategory-container {
+                margin-bottom: 30px;
+                padding: 20px;
+            }
+        }
+        
+        .subcategory-container.show {
+            display: block;
+        }
+        
+        .subcategory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .subcategory-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+        }
+        
+        .subcategory-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        @media (min-width: 768px) {
+            .subcategory-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+        
+        .subcategory-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .subcategory-btn.active {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .results {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        @media (min-width: 640px) {
+            .results {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .results {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 20px;
+            }
+        }
+        
+        .business-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .business-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .business-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .business-info {
+            margin: 8px 0;
+            color: #4a5568;
+        }
+        
+        .business-info strong {
+            color: #2d3748;
+        }
+        
+        .phone-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .phone-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        .phone-link::before {
+            content: "📞";
+            font-size: 16px;
+        }
+        
+        .register-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+        }
+        
+        .register-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #718096;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @media (min-width: 768px) {
+            .modal-content {
+                padding: 40px;
+            }
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .modal-header {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            outline: none;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+        }
+        
+        .subcategory-hint {
+            margin-bottom: 10px;
+            color: #718096;
+            font-size: 14px;
+            font-style: italic;
+        }
+        
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 640px) {
+            .form-actions {
+                flex-direction: row;
+                margin-top: 30px;
+            }
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CDC දොඩන්ගොඩ</h1>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchBox" placeholder="ව්‍යාපාරය, නම, ස්ථානය හෝ දුරකතන අංකය සොයන්න...">
+        </div>
+        
+        <div class="category-tabs">
+            <button class="tab govs active" data-category="govs">රාජ්‍ය සේවා</button>
+            <button class="tab govg" data-category="govg">රාජ්‍ය භාණ්ඩ</button>
+            <button class="tab pvts" data-category="pvts">පෞද්ගලික සේවා</button>
+            <button class="tab pvtg" data-category="pvtg">පෞද්ගලික භාණ්ඩ</button>
+            <button class="tab" data-category="all" style="background: #48bb78; color: white;">සියල්ල</button>
+        </div>
+        
+        <div class="subcategory-container" id="subcategoryContainer">
+            <div class="subcategory-grid" id="subcategoryGrid"></div>
+        </div>
+        
+        <div id="results" class="results">
+            <div class="loading">දත්ත පූරණය වෙමින්...</div>
+        </div>
+        
+        <button class="register-btn" id="registerBtn">Register</button>
+        
+        <div class="footer">
+            Copyright © eduhelp - 2025
+        </div>
+    </div>
+    
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">ව්‍යාපාරය ලියාපදිංචි කරන්න</div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>ව්‍යාපාර වර්ගය *</label>
+                    <select id="categorySelect" required>
+                        <option value="">තෝරන්න</option>
+                        <option value="govs">රාජ්‍ය සේවා</option>
+                        <option value="govg">රාජ්‍ය භාණ්ඩ</option>
+                        <option value="pvts">පෞද්ගලික සේවා</option>
+                        <option value="pvtg">පෞද්ගලික භාණ්ඩ</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="subcategoryGroup" style="display:none;">
+                    <label>උප වර්ගය *</label>
+                    <div class="subcategory-hint">ඇතුළත් කරන්න / නැතහොත් පහළ ඒවා අතරින් තෝරන්න</div>
+                    <input type="text" id="subcategoryInput" list="subcategoryDatalist" placeholder="නව උප වර්ගයක් ඇතුළත් කරන්න හෝ තෝරන්න" required>
+                    <datalist id="subcategoryDatalist"></datalist>
+                </div>
+                
+                <div class="form-group">
+                    <label>ව්‍යාපාර නාමය *</label>
+                    <input type="text" id="businessName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>හිමිකරුගේ නම *</label>
+                    <input type="text" id="ownerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>දුරකතන අංකය *</label>
+                    <input type="tel" id="phoneNumber" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>විද්‍යුත් තැපෑල</label>
+                    <input type="email" id="email">
+                </div>
+                
+                <div class="form-group">
+                    <label>ව්‍යාපාරික ස්ථානය *</label>
+                    <input type="text" id="businessPlace" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">අවලංගු කරන්න</button>
+                    <button type="submit" class="btn btn-primary">Copy & Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://jcijglwpkfluyzrltimk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjaWpnbHdwa2ZsdXl6cmx0aW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4MzU3OTUsImV4cCI6MjA4MjQxMTc5NX0.dvT8OiyVEiYn_DhkMakmSq1Vvr4REDr0kYPnyqCtWHs';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const subcategories = {
+            govs: ['සෞඛ්‍ය', 'කෘෂිකර්ම', 'අධ්‍යාපන', 'ආරක්ෂක', 'වෙනත්'],
+            govg: ['පොහොර', 'බීජ හා පැළ', 'ඉඩම්'],
+            pvts: ['අධ්‍යාපන', 'පෙදරේරු', 'වඩු කාර්මික', 'විදුලි කාර්මික', 'ගස් හා අතු කැපීම්', 'කුලී රථ හා ප්‍රවාහන සේවා', 'තණකොළ කැපීම', 'ළිං කැපීම හා ඉසීම', 'උපස්ථායක සේවා', 'වතු වැඩ', 'වෙනත්'],
+            pvtg: ['ආහාර', 'ඇඳුම් පැළඳුම්', 'කාර්මික උපකරණ', 'හාඩ්වෙයාර්', 'ගල්/වැලි/පස්', 'උත්සව භාණ්ඩ', 'ශබ්ද විකාශන උපකරණ සැපයීම', 'රථවාහන කුලියට දීම','වෙනත්']
+        };
+        
+        let allData = [];
+        let currentCategory = 'govs';
+        let currentSubcategory = null;
+        
+        async function loadData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cdcd800')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                allData = data || [];
+                updateSubcategories();
+                applyFilters();
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    '<div class="no-results">දත්ත පූරණය කිරීමේදී දෝෂයක් ඇතිවිය: ' + error.message + '</div>';
+            }
+        }
+        
+        function updateSubcategories() {
+            const container = document.getElementById('subcategoryContainer');
+            const grid = document.getElementById('subcategoryGrid');
+            
+            if (currentCategory === 'all') {
+                container.classList.remove('show');
+                return;
+            }
+            
+            const subs = subcategories[currentCategory] || [];
+            grid.innerHTML = subs.map(sub => 
+                `<button class="subcategory-btn" data-subcategory="${sub}">${sub}</button>`
+            ).join('');
+            
+            container.classList.add('show');
+            
+            document.querySelectorAll('.subcategory-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.subcategory-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentSubcategory = this.dataset.subcategory;
+                    applyFilters();
+                });
+            });
+        }
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">ප්‍රතිඵල හමු නොවිය</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = data.map(business => {
+                const name = business.b_name.substring(business.b_name.indexOf('_') + 1);
+                const phoneNumber = business.t_number;
+                
+                return `
+                    <div class="business-card">
+                        <div class="business-name">${name}</div>
+                        <div class="business-info"><strong>හිමිකරු:</strong> ${business.p_name}</div>
+                        <div class="business-info">
+                            <strong>දුරකතනය:</strong> 
+                            <a href="tel:${phoneNumber}" class="phone-link">${phoneNumber}</a>
+                        </div>
+                        ${business.e_mail ? `<div class="business-info"><strong>විද්‍යුත් තැපෑල:</strong> ${business.e_mail}</div>` : ''}
+                        <div class="business-info"><strong>ස්ථානය:</strong> ${business.b_s_place}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
+            let filtered = allData;
+            
+            // If there's a search term, search across ALL data first
+            if (searchTerm) {
+                filtered = allData.filter(b => {
+                    // Check all fields in the database
+                    const searchableText = [
+                        b.id,
+                        b.b_name,
+                        b.p_name,
+                        b.t_number,
+                        b.e_mail,
+                        b.b_s_place
+                    ].filter(val => val !== null && val !== undefined)
+                     .join(' ')
+                     .toLowerCase();
+                    
+                    return searchableText.includes(searchTerm);
+                });
+            } else {
+                // Only apply category filter if no search term
+                if (currentCategory !== 'all') {
+                    filtered = filtered.filter(b => b.b_name && b.b_name.startsWith(currentCategory + '_'));
+                }
+                
+                if (currentSubcategory) {
+                    filtered = filtered.filter(b => {
+                        const fullName = (b.b_name || '').toLowerCase();
+                        return fullName.includes(currentSubcategory.toLowerCase());
+                    });
+                }
+            }
+            
+            displayResults(filtered);
+        }
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                currentCategory = this.dataset.category;
+                currentSubcategory = null;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                updateSubcategories();
+                applyFilters();
+            });
+        });
+        
+        document.getElementById('searchBox').addEventListener('input', () => {
+            applyFilters();
+        });
+        
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            document.getElementById('registerModal').classList.add('show');
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            document.getElementById('registerModal').classList.remove('show');
+            document.getElementById('registerForm').reset();
+            document.getElementById('subcategoryGroup').style.display = 'none';
+        });
+        
+        document.getElementById('categorySelect').addEventListener('change', function() {
+            const subcatGroup = document.getElementById('subcategoryGroup');
+            const datalist = document.getElementById('subcategoryDatalist');
+            
+            if (this.value && subcategories[this.value]) {
+                datalist.innerHTML = subcategories[this.value].map(sub => 
+                    `<option value="${sub}">`
+                ).join('');
+                subcatGroup.style.display = 'block';
+            } else {
+                subcatGroup.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const category = document.getElementById('categorySelect').value;
+            const subcategory = document.getElementById('subcategoryInput').value;
+            const businessName = document.getElementById('businessName').value;
+            const ownerName = document.getElementById('ownerName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const email = document.getElementById('email').value;
+            const businessPlace = document.getElementById('businessPlace').value;
+            
+            const categoryNames = {
+                'govs': 'රාජ්‍ය සේවා',
+                'govg': 'රාජ්‍ය භාණ්ඩ',
+                'pvts': 'පෞද්ගලික සේවා',
+                'pvtg': 'පෞද්ගලික භාණ්ඩ'
+            };
+            
+            const message = `CDC දොඩන්ගොඩ - ව්‍යාපාර ලියාපදිංචිය
+
+ව්‍යාපාර වර්ගය: ${categoryNames[category]}
+උප වර්ගය: ${subcategory}
+ව්‍යාපාර නාමය: ${businessName}
+හිමිකරුගේ නම: ${ownerName}
+දුරකතන අංකය: ${phoneNumber}
+විද්‍යුත් තැපෑල: ${email || 'නැත'}
+ව්‍යාපාරික ස්ථානය: ${businessPlace}`;
+            
+            navigator.clipboard.writeText(message).then(() => {
+                alert('දත්ත copy කර ඇත! WhatsApp වෙත යන්න...');
+                window.open(`https://wa.me/94716637804?text=${encodeURIComponent(message)}`, '_blank');
+                document.getElementById('registerModal').classList.remove('show');
+                document.getElementById('registerForm').reset();
+                document.getElementById('subcategoryGroup').style.display = 'none';
+            }).catch(() => {
+                window.open(`https://wa.me/94716637804?text=${encodeURIComponent(message)}`, '_blank');
+                document.getElementById('registerModal').classList.remove('show');
+                document.getElementById('registerForm').reset();
+                document.getElementById('subcategoryGroup').style.display = 'none';
+            });
+        });
+        
+        loadData();
+    </script>
+</body>
+</html>
