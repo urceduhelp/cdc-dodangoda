@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>භාණ්ඩ හා සේවා දොඩන්ගොඩ</title>
+    <title>DOD</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -518,16 +518,65 @@
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
+        const subcategoryMap = {
+            'ප්‍රාදේශීය ලේකම් කාර්යාලය': 'gs001',
+            'ප්‍රාදේශීය ලේකම්': 'gs002',
+            'ප්‍රාදේශීය සභාව': 'ps001',
+            'ග්‍රාම නිළධාරී': 'gs003',
+            'පොලිස් ස්ථානය': 'plc001',
+            'ගිලන්රථ': 'amb001',
+            'සමෘද්ධි නිළධාරී': 'gs004',
+            'ගොවිජන නිළධාරී': 'gs005',
+            'මන්ත්‍රීවරු': 'mbr001',
+            'සෞඛ්‍ය': 'govh001',
+            'කෘෂිකර්ම': 'agr001',
+            'අධ්‍යාපන': 'edu001',
+            'ආරක්ෂක': 'scrt001',
+            'පොහොර': 'plz001',
+            'බීජ හා පැළ': 'sdsp001',
+            'ඉඩම්': 'lnd001',
+            'උපදේශනය': 'edu002',
+            'ආධ්‍යාපන මාර්ගෝපදේශනය': 'edu004',
+            'වෘත්තීය මාර්ගෝපදේශනය': 'edu003',
+            'පෙදරේරු': 'car001',
+            'වඩු කාර්මික': 'car002',
+            'විදුලි කාර්මික': 'elc001',
+            'පින්තාරු වැඩ': 'bp001',
+            'වෙල්ඩින් වැඩ': 'wld001',
+            'සිවිලිං ගැසීම': 'cln001',
+            'රූපලාවන්‍ය': 'bc001',
+            'ගස් හා අතු කැපීම්': 'rtbc001',
+            'ත්‍රීවීල් හයර්': 'hr003',
+            'වෙනත් කුලී රථ හා ප්‍රවාහන සේවා': 'hr004',
+            'තණකොළ කැපීම': 'gctr001',
+            'ළිං කැපීම හා ඉසීම': 'wc001',
+            'උපස්ථායක සේවා': 'hspt001',
+            'ජ්‍යෝතිෂ හා වාස්තු විද්‍යා': 'jts001',
+            'නිවාස සැලසුම් හා ඇස්තමේන්තු': 'hpc001',
+            'පරිගණක අලුත්වැඩියාව': 'pc001',
+            'මංගල සේවා': 'wdn001',
+            'වතු වැඩ': 'stw001',
+            'ආහාර': 'food001',
+            'ඇඳුම් පැළඳුම්': 'drs001',
+            'කාර්මික උපකරණ': 'itool001',
+            'හාඩ්වෙයාර්': 'hwdr001',
+            'ගල්/වැලි/පස්': 'gserth001',
+            'උත්සව භාණ්ඩ': 'pt001',
+            'ශබ්ද විකාශන උපකරණ සැපයීම': 'snd001',
+            'රථවාහන කුලියට දීම': 'rnt001',
+            'වෙනත්': 'other001'
+        };
+        
         const subcategories = {
-            govs: ['ප්‍රාදේශීය ලේකම් කාර්යාලය','ප්‍රාදේශීය සභාව','ග්‍රාම නිළධාරී','පොලිස් ස්ථානය','ගිලන්රථ','සමෘද්ධි නිළධාරී','ගොවිජන නිළධාරී','මන්ත්‍රීවරු','සෞඛ්‍ය', 'කෘෂිකර්ම', 'අධ්‍යාපන', 'ආරක්ෂක', 'වෙනත්'],
-            govg: ['පොහොර', 'බීජ හා පැළ', 'ඉඩම්'],
-            pvts: ['අධ්‍යාපන','උපදේශනය, ආධ්‍යාපන මාර්ගෝපදේශනය, වෘත්තීය මාර්ගෝපදේශනය', 'පෙදරේරු', 'වඩු කාර්මික', 'විදුලි කාර්මික','රූපලාවන්‍ය කටයුතු', 'ගස් හා අතු කැපීම්','ත්‍රීවීල් හයර්', 'වෙනත් කුලී රථ හා ප්‍රවාහන සේවා', 'තණකොළ කැපීම', 'ළිං කැපීම හා ඉසීම', 'උපස්ථායක සේවා','ජ්‍යෝතිෂ හා වාස්තු විද්‍යා කටයුතු','නිවාස සැලසුම් හා ඇස්තමේන්තු කටයුතු','පරිගණක අලුත්වැඩියාව','මංගල සේවා', 'වතු වැඩ', 'වෙනත්'],
+            govs: ['ප්‍රාදේශීය ලේකම් කාර්යාලය','ප්‍රාදේශීය ලේකම්','ප්‍රාදේශීය සභාව','ග්‍රාම නිළධාරී','පොලිස් ස්ථානය','ගිලන්රථ','සමෘද්ධි නිළධාරී','ගොවිජන නිළධාරී','මන්ත්‍රීවරු','සෞඛ්‍ය', 'කෘෂිකර්ම', 'අධ්‍යාපන', 'ආරක්ෂක', 'වෙනත්'],
+            govg: ['පොහොර', 'බීජ හා පැළ', 'ඉඩම්', 'වෙනත්'],
+            pvts: ['අධ්‍යාපන','උපදේශනය','ආධ්‍යාපන මාර්ගෝපදේශනය','වෘත්තීය මාර්ගෝපදේශනය', 'පෙදරේරු', 'වඩු කාර්මික', 'විදුලි කාර්මික','පින්තාරු වැඩ','වෙල්ඩින් වැඩ','සිවිලිං ගැසීම','රූපලාවන්‍ය', 'ගස් හා අතු කැපීම්','ත්‍රීවීල් හයර්', 'වෙනත් කුලී රථ හා ප්‍රවාහන සේවා', 'තණකොළ කැපීම', 'ළිං කැපීම හා ඉසීම', 'උපස්ථායක සේවා','ජ්‍යෝතිෂ හා වාස්තු විද්‍යා','නිවාස සැලසුම් හා ඇස්තමේන්තු','පරිගණක අලුත්වැඩියාව','මංගල සේවා', 'වතු වැඩ', 'වෙනත්'],
             pvtg: ['ආහාර', 'ඇඳුම් පැළඳුම්', 'කාර්මික උපකරණ', 'හාඩ්වෙයාර්', 'ගල්/වැලි/පස්', 'උත්සව භාණ්ඩ', 'ශබ්ද විකාශන උපකරණ සැපයීම', 'රථවාහන කුලියට දීම','වෙනත්']
         };
         
         let allData = [];
         let currentCategory = 'govs';
-        let currentSubcategory = null;
+        let currentSubcategoryCode = null;
         
         async function loadData() {
             try {
@@ -556,9 +605,10 @@
             }
             
             const subs = subcategories[currentCategory] || [];
-            grid.innerHTML = subs.map(sub => 
-                `<button class="subcategory-btn" data-subcategory="${sub}">${sub}</button>`
-            ).join('');
+            grid.innerHTML = subs.map(sub => {
+                const code = subcategoryMap[sub] || '';
+                return `<button class="subcategory-btn" data-code="${code}" data-name="${sub}">${sub}</button>`;
+            }).join('');
             
             container.classList.add('show');
             
@@ -566,7 +616,7 @@
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.subcategory-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    currentSubcategory = this.dataset.subcategory;
+                    currentSubcategoryCode = this.dataset.code;
                     applyFilters();
                 });
             });
@@ -603,17 +653,16 @@
             const searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
             let filtered = allData;
             
-            // If there's a search term, search across ALL data first
             if (searchTerm) {
                 filtered = allData.filter(b => {
-                    // Check all fields in the database
                     const searchableText = [
                         b.id,
                         b.b_name,
                         b.p_name,
                         b.t_number,
                         b.e_mail,
-                        b.b_s_place
+                        b.b_s_place,
+                        b.sub_cat
                     ].filter(val => val !== null && val !== undefined)
                      .join(' ')
                      .toLowerCase();
@@ -621,15 +670,19 @@
                     return searchableText.includes(searchTerm);
                 });
             } else {
-                // Only apply category filter if no search term
                 if (currentCategory !== 'all') {
                     filtered = filtered.filter(b => b.b_name && b.b_name.startsWith(currentCategory + '_'));
                 }
                 
-                if (currentSubcategory) {
+                if (currentSubcategoryCode) {
                     filtered = filtered.filter(b => {
-                        const fullName = (b.b_name || '').toLowerCase();
-                        return fullName.includes(currentSubcategory.toLowerCase());
+                        if (!b.sub_cat) return false;
+                        
+                        // Check if sub_cat contains multiple codes separated by /
+                        const subCatCodes = b.sub_cat.split('/').map(code => code.trim());
+                        
+                        // Return true if any of the codes match the selected subcategory
+                        return subCatCodes.includes(currentSubcategoryCode);
                     });
                 }
             }
@@ -640,7 +693,7 @@
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 currentCategory = this.dataset.category;
-                currentSubcategory = null;
+                currentSubcategoryCode = null;
                 
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
@@ -696,17 +749,19 @@
                 'pvtg': 'පෞද්ගලික භාණ්ඩ'
             };
             
+            const subcatCode = subcategoryMap[subcategory] || 'other001';
+            
             const message = `CDC දොඩන්ගොඩ - ව්‍යාපාර ලියාපදිංචිය
 
 ව්‍යාපාර වර්ගය: ${categoryNames[category]}
 උප වර්ගය: ${subcategory}
+උප වර්ග කේතය: ${subcatCode}
 ව්‍යාපාර නාමය: ${businessName}
 හිමිකරුගේ නම: ${ownerName}
 දුරකතන අංකය: ${phoneNumber}
 විද්‍යුත් තැපෑල: ${email || 'නැත'}
 ව්‍යාපාරික ස්ථානය: ${businessPlace}`;
-            
-            // Try to copy to clipboard
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(message).then(() => {
                     alert('දත්ත clipboard එකට copy කර ඇත!');
@@ -715,7 +770,6 @@
                 });
             }
             
-            // Open WhatsApp
             setTimeout(() => {
                 window.open(`https://wa.me/94716637804?text=${encodeURIComponent(message)}`, '_blank');
                 document.getElementById('registerModal').classList.remove('show');
