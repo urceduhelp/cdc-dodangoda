@@ -254,12 +254,36 @@
             font-size: 16px;
         }
         
-        .register-btn {
-            display: block;
-            margin: 30px auto;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .register-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin: 40px 0 30px 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+        }
+        
+        .register-text {
             color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        @media (min-width: 768px) {
+            .register-text {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        .register-btn {
+            display: inline-block;
+            margin: 0;
+            padding: 15px 40px;
+            background: white;
+            color: #f5576c;
             border: none;
             border-radius: 50px;
             font-size: 20px;
@@ -267,11 +291,13 @@
             cursor: pointer;
             transition: all 0.3s;
             font-family: 'Noto Sans Sinhala', sans-serif;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .register-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.4);
+            background: #fff;
         }
         
         .footer {
@@ -449,7 +475,10 @@
             <div class="loading">දත්ත පූරණය වෙමින්...</div>
         </div>
         
-        <button class="register-btn" id="registerBtn">Register</button>
+        <div class="register-section">
+            <p class="register-text">ඔබගේ ව්‍යාපාරයත් මේ පද්ධතියට ඇතුළත් කරන්න.</p>
+            <button class="register-btn" id="registerBtn">Register</button>
+        </div>
         
         <div class="footer">
             Copyright © eduhelp - 2025
