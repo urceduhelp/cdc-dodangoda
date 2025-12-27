@@ -706,18 +706,22 @@
 විද්‍යුත් තැපෑල: ${email || 'නැත'}
 ව්‍යාපාරික ස්ථානය: ${businessPlace}`;
             
-            navigator.clipboard.writeText(message).then(() => {
-                alert('දත්ත copy කර ඇත! WhatsApp වෙත යන්න...');
+            // Try to copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(message).then(() => {
+                    alert('දත්ත clipboard එකට copy කර ඇත!');
+                }).catch(() => {
+                    console.log('Clipboard copy failed, but proceeding to WhatsApp');
+                });
+            }
+            
+            // Open WhatsApp
+            setTimeout(() => {
                 window.open(`https://wa.me/94716637804?text=${encodeURIComponent(message)}`, '_blank');
                 document.getElementById('registerModal').classList.remove('show');
                 document.getElementById('registerForm').reset();
                 document.getElementById('subcategoryGroup').style.display = 'none';
-            }).catch(() => {
-                window.open(`https://wa.me/94716637804?text=${encodeURIComponent(message)}`, '_blank');
-                document.getElementById('registerModal').classList.remove('show');
-                document.getElementById('registerForm').reset();
-                document.getElementById('subcategoryGroup').style.display = 'none';
-            });
+            }, 500);
         });
         
         loadData();
