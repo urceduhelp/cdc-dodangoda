@@ -234,6 +234,12 @@
             color: #2d3748;
         }
         
+        .phone-numbers {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
         .phone-link {
             color: #667eea;
             text-decoration: none;
@@ -406,6 +412,13 @@
             font-style: italic;
         }
         
+        .phone-hint {
+            margin-top: 5px;
+            color: #718096;
+            font-size: 13px;
+            font-style: italic;
+        }
+        
         .form-actions {
             display: flex;
             flex-direction: column;
@@ -518,8 +531,9 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>දුරකතන අංකය *</label>
-                    <input type="tel" id="phoneNumber" required>
+                    <label>දුරකතන අංක *</label>
+                    <input type="text" id="phoneNumber" placeholder="උදා: 0712345678 / 0776543210 / 0341234567" required>
+                    <div class="phone-hint">දුරකතන අංක කිහිපයක් ඇතුළත් කිරීමට / (forward slash) යොදන්න</div>
                 </div>
                 
                 <div class="form-group">
@@ -616,7 +630,6 @@
 			govg: ['පොහොර','බීජ හා පැළ'],
 			pvts: ['පෞද්ගලික වෛද්‍ය මධ්‍යස්ථාන','ආරක්ෂක සේවා(පෞද්ගලික)','ඉඩම් විකිණීම්','අධ්‍යාපන(පෞද්ගලික පන්ති)','උපදේශනය','අධ්‍යාපන මාර්ගෝපදේශනය','වෘත්තීය මාර්ගෝපදේශනය','පෙදරේරු','වඩු කාර්මික','විදුලි කාර්මික','පින්තාරු වැඩ','වෙල්ඩින් වැඩ','සිවිලිං ගැසීම','ඇලුමීනියම් වැඩ','රූපලාවන්‍ය','ගස් හා අතු කැපීම්','ත්‍රීවීල් හයර්','වෙනත් කුලී රථ හා ප්‍රවාහන සේවා','තණකොළ කැපීම','ළිං කැපීම හා ඉසීම','උපස්ථායක සේවා','ජ්‍යෝතිෂ හා වාස්තු විද්‍යා','නිවාස සැලසුම් හා ඇස්තමේන්තු','පරිගණක අලුත්වැඩියාව','මංගල සේවා','වතු වැඩ'],
 			pvtg: ['ආහාර(වියලි)','ඇඳුම් පැළඳුම්','කාර්මික උපකරණ කුලියට දීම','හාඩ්වෙයාර්','ගල්/වැලි/පස්','උත්සව භාණ්ඩ','කේටරින් හා වෙනත් ආහාර සේවා','ශබ්ද විකාශන උපකරණ සැපයීම','රථවාහන කුලියට දීම','පිරිත් මණ්ඩප'],
-
         };
         
         let allData = [];
@@ -677,7 +690,13 @@
             
             resultsDiv.innerHTML = data.map(business => {
                 const name = business.b_name.substring(business.b_name.indexOf('_') + 1);
-                const phoneNumber = business.t_number;
+                const phoneNumbers = business.t_number.split('/').map(num => num.trim());
+                
+                const phoneNumbersHTML = phoneNumbers.length > 1 
+                    ? `<div class="phone-numbers">
+                         ${phoneNumbers.map(num => `<a href="tel:${num}" class="phone-link">${num}</a>`).join('')}
+                       </div>`
+                    : `<a href="tel:${phoneNumbers[0]}" class="phone-link">${phoneNumbers[0]}</a>`;
                 
                 return `
                     <div class="business-card">
@@ -685,7 +704,7 @@
                         <div class="business-info"><strong>හිමිකරු:</strong> ${business.p_name}</div>
                         <div class="business-info">
                             <strong>දුරකතනය:</strong> 
-                            <a href="tel:${phoneNumber}" class="phone-link">${phoneNumber}</a>
+                            ${phoneNumbersHTML}
                         </div>
                         ${business.e_mail ? `<div class="business-info"><strong>විද්‍යුත් තැපෑල:</strong> ${business.e_mail}</div>` : ''}
                         <div class="business-info"><strong>ස්ථානය:</strong> ${business.b_s_place}</div>
@@ -723,10 +742,8 @@
                     filtered = filtered.filter(b => {
                         if (!b.sub_cat) return false;
                         
-                        // Check if sub_cat contains multiple codes separated by /
                         const subCatCodes = b.sub_cat.split('/').map(code => code.trim());
                         
-                        // Return true if any of the codes match the selected subcategory
                         return subCatCodes.includes(currentSubcategoryCode);
                     });
                 }
